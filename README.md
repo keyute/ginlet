@@ -23,9 +23,9 @@ func main() {
 		GetRoute: ginlet.Route{
 			Handler: func(c *gin.Context) {
 				c.String(200, "Hello, world!")
-            },
-        },
-    }
+			},
+		},
+	}
 	engine := ginlet.Engine{
 		RouterGroups: []ginlet.RouterGroup{rg},
 	}

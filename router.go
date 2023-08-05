@@ -6,65 +6,48 @@ import (
 	"net/http"
 )
 
-// RouterGroup represents a group of routes
+// RouterGroup represents a group of routes that share a common base path and middleware functions.
 type RouterGroup struct {
 	// BasePath is the common prefix for all routes in this group
 	BasePath string
-
-	// Middlewares are functions that are executed for each route in this group before the route's own middlewares but after PersistentMiddlewares.
+	// Middlewares are executed for each route in this group before the route's own middlewares.
 	Middlewares []gin.HandlerFunc
-
-	// PersistentMiddlewares are functions that are executed for each route in this group before the route's own middlewares
-	// and before Middlewares. These middlewares persist across all routes, including the ones that might be added to the group later.
+	// PersistentMiddlewares are executed for each route before the route's own middlewares and Middlewares.
 	PersistentMiddlewares []gin.HandlerFunc
-
 	// Routes is a map where the key is the HTTP method and the value is a slice of Route.
-	// The supported HTTP methods are GET, POST, PATCH, PUT, DELETE.
 	Routes map[string][]Route
-
 	// PreFunc is a function that is executed before Apply is called
 	PreFunc func() error
-
 	// PostFunc is a function that is executed after Apply is called
 	PostFunc func() error
-
 	// SubGroups are nested router groups. Each subgroup inherits BasePath and PersistentMiddlewares from its parent.
 	SubGroups []RouterGroup
 }
 
-// RestRouterGroup is a specialized version of RouterGroup intended for creating
-// RESTful API endpoints. It includes fields for each of the main HTTP methods used in REST.
+// RestRouterGroup is a specialized version of RouterGroup for creating RESTful API endpoints.
 // If RouterGroup.Routes is not empty, it will be ignored.
 type RestRouterGroup struct {
-
 	//GetRoute is the route for GET requests
 	GetRoute Route
-
 	//PostRoute is the route for POST requests
 	PostRoute Route
-
 	//PatchRoute is the route for PATCH requests
 	PatchRoute Route
-
 	//PutRoute is the route for PUT requests
 	PutRoute Route
-
 	//DeleteRoute is the route for DELETE requests
 	DeleteRoute Route
-
+	// RouterGroup is the base group of routes for the RESTful API.
 	RouterGroup
 }
 
 // Route represents a single route
 type Route struct {
-
 	// Path is the path for this route
 	Path string
-
-	// Handler is the handler for this route
+	// Handler is the function to execute for this route.
 	Handler func(c *gin.Context)
-
-	// Middlewares are functions that are executed for this route after RouterGroup.PersistentMiddlewares and RouterGroup.Middlewares
+	// Middlewares are functions executed for this route after RouterGroup.PersistentMiddlewares and RouterGroup.Middlewares.
 	Middlewares []gin.HandlerFunc
 }
 
