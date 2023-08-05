@@ -14,7 +14,7 @@ func (e *Engine) New() (*gin.Engine, error) {
 	r.Use(e.Middlewares...)
 	controller := r.Group("")
 	for _, rg := range e.RouterGroups {
-		if _, err := rg.New(controller); err != nil {
+		if _, err := rg.Apply(controller); err != nil {
 			return nil, err
 		}
 	}
