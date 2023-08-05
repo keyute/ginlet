@@ -1,4 +1,4 @@
-package gimlet
+package ginlet
 
 import "github.com/gin-gonic/gin"
 
