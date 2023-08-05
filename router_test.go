@@ -10,7 +10,6 @@ import (
 )
 
 func TestRouterGroup_Apply(t *testing.T) {
-	router := gin.Default()
 	handler := func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	}
@@ -24,8 +23,8 @@ func TestRouterGroup_Apply(t *testing.T) {
 			http.MethodDelete: {{Handler: handler}},
 		},
 	}
-	_, err := group.Apply(router.Group(""))
-	assert.NoError(t, err)
+	router, err := NewEngine(&group)
+	assert.NotNil(t, router, err)
 	assert.NoError(t, testRequest(router, path, http.MethodGet, http.StatusOK))
 	assert.NoError(t, testRequest(router, path, http.MethodPost, http.StatusOK))
 	assert.NoError(t, testRequest(router, path, http.MethodPatch, http.StatusOK))
@@ -33,18 +32,16 @@ func TestRouterGroup_Apply(t *testing.T) {
 }
 
 func TestRouterGroup_ApplyError(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		Routes: map[string][]Route{
 			http.MethodGet: {{}},
 		},
 	}
-	_, err := group.Apply(router.Group(""))
+	_, err := NewEngine(&group)
 	assert.Errorf(t, err, "handler is nil for route /")
 }
 
 func TestRouterGroup_Nested(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		BasePath: "/test",
 		SubGroups: []BaseRoute{&RouterGroup{
@@ -56,13 +53,12 @@ func TestRouterGroup_Nested(t *testing.T) {
 			},
 		}},
 	}
-	_, err := group.Apply(router.Group(""))
-	assert.NoError(t, err)
+	router, err := NewEngine(&group)
+	assert.NotNil(t, router, err)
 	assert.NoError(t, testRequest(router, "/test/nested", http.MethodGet, http.StatusOK))
 }
 
 func TestRouterGroup_NestedWithError(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		SubGroups: []BaseRoute{
 			&RouterGroup{
@@ -72,34 +68,31 @@ func TestRouterGroup_NestedWithError(t *testing.T) {
 			},
 		},
 	}
-	_, err := group.Apply(router.Group(""))
+	_, err := NewEngine(&group)
 	assert.Errorf(t, err, "error")
 }
 
 func TestRouterGroup_PreFunc(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		PreFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
 	}
-	_, err := group.Apply(router.Group(""))
+	_, err := NewEngine(&group)
 	assert.Errorf(t, err, "error")
 }
 
 func TestRouterGroup_PostFunc(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		PostFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
 	}
-	_, err := group.Apply(router.Group(""))
+	_, err := NewEngine(&group)
 	assert.Errorf(t, err, "error")
 }
 
 func TestRouterGroup_Middleware(t *testing.T) {
-	router := gin.Default()
 	group := RouterGroup{
 		Routes: map[string][]Route{
 			http.MethodGet: {{
@@ -114,8 +107,8 @@ func TestRouterGroup_Middleware(t *testing.T) {
 			}},
 		},
 	}
-	_, err := group.Apply(router.Group(""))
-	assert.NoError(t, err)
+	router, err := NewEngine(&group)
+	assert.NotNil(t, router, err)
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -125,7 +118,6 @@ func TestRouterGroup_Middleware(t *testing.T) {
 }
 
 func TestRestRouterGroup(t *testing.T) {
-	router := gin.Default()
 	group := RestRouterGroup{
 		GetRoute: Route{
 			Handler: func(c *gin.Context) {
@@ -134,7 +126,17 @@ func TestRestRouterGroup(t *testing.T) {
 			Path: "/test",
 		},
 	}
-	_, err := group.Apply(router.Group(""))
-	assert.NoError(t, err)
+	router, err := NewEngine(&group)
+	assert.NotNil(t, router, err)
 	assert.NoError(t, testRequest(router, "/test", http.MethodGet, http.StatusOK))
+}
+
+func testRequest(r *gin.Engine, path string, method string, code int) error {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(method, path, nil)
+	r.ServeHTTP(w, req)
+	if w.Code != code {
+		return fmt.Errorf("expected %d, got %d: %s", code, w.Code, w.Body.String())
+	}
+	return nil
 }

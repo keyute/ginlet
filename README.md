@@ -19,19 +19,15 @@ import (
 )
 
 func main() {
-	engine := ginlet.Engine{
-		RouterGroups: []ginlet.BaseRoute{
-			&ginlet.RestRouterGroup{
-				GetRoute: ginlet.Route{
-					Handler: func(c *gin.Context) {
-						c.String(200, "Hello, world!")
-					},
-				},
+	route := ginlet.RestRouterGroup{
+		GetRoute: ginlet.Route{
+			Handler: func(c *gin.Context) {
+				c.String(200, "Hello, world!")
 			},
 		},
 	}
-	r, _ := engine.New() // returns *gin.Engine
-	_ = r.Run()
+	engine, _ := ginlet.NewEngine(route)
+	_ = engine.Run()
 }
 
 ```

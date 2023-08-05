@@ -118,3 +118,13 @@ func (rrg *RestRouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, er
 
 	return rrg.RouterGroup.Apply(parent)
 }
+
+// NewEngine creates a new gin.Engine with the provided BaseRoute.
+// Keep in mind that the engine is created with gin.New not gin.Default, so you will need to add your own middleware.
+func NewEngine(route BaseRoute) (*gin.Engine, error) {
+	engine := gin.New()
+	if _, err := route.Apply(engine.Group("")); err != nil {
+		return nil, err
+	}
+	return engine, nil
+}
