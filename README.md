@@ -27,7 +27,7 @@ func main() {
 		},
 	}
 	engine := ginlet.Engine{
-		RouterGroups: []ginlet.RouterGroup{rg},
+		RouterGroups: []ginlet.BaseRoute{rg},
 	}
 	r, _ := engine.New() // returns *gin.Engine
 	_ = r.Run()
