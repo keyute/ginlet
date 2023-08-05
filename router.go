@@ -17,9 +17,9 @@ type RouterGroup struct {
 	// Routes is a map where the key is the HTTP method and the value is a slice of Route.
 	Routes map[string][]Route
 	// PreFunc is a function that is executed before Apply is called
-	PreFunc func() error
+	PreFunc func(rg *gin.RouterGroup) error
 	// PostFunc is a function that is executed after Apply is called
-	PostFunc func() error
+	PostFunc func(rg *gin.RouterGroup) error
 	// SubGroups are nested router groups. Each subgroup inherits BasePath and PersistentMiddlewares from its parent.
 	SubGroups []RouterGroup
 }
@@ -64,12 +64,12 @@ func (r *Route) apply(group *gin.RouterGroup, httpMethod string, middlewares []g
 
 // Apply adds routes to a provided gin router group based on the RouterGroup's configuration.
 func (rg *RouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
+	group := parent.Group(rg.BasePath)
 	if rg.PreFunc != nil {
-		if err := rg.PreFunc(); err != nil {
+		if err := rg.PreFunc(group); err != nil {
 			return nil, err
 		}
 	}
-	group := parent.Group(rg.BasePath)
 	group.Use(rg.PersistentMiddlewares...)
 
 	for method, routes := range rg.Routes {
@@ -87,7 +87,7 @@ func (rg *RouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) 
 	}
 
 	if rg.PostFunc != nil {
-		if err := rg.PostFunc(); err != nil {
+		if err := rg.PostFunc(group); err != nil {
 			return nil, err
 		}
 	}

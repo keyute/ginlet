@@ -66,7 +66,7 @@ func TestRouterGroup_NestedWithError(t *testing.T) {
 	group := RouterGroup{
 		SubGroups: []RouterGroup{
 			{
-				PreFunc: func() error {
+				PreFunc: func(rg *gin.RouterGroup) error {
 					return fmt.Errorf("error")
 				},
 			},
@@ -79,7 +79,7 @@ func TestRouterGroup_NestedWithError(t *testing.T) {
 func TestRouterGroup_PreFunc(t *testing.T) {
 	router := gin.Default()
 	group := RouterGroup{
-		PreFunc: func() error {
+		PreFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
 	}
@@ -90,7 +90,7 @@ func TestRouterGroup_PreFunc(t *testing.T) {
 func TestRouterGroup_PostFunc(t *testing.T) {
 	router := gin.Default()
 	group := RouterGroup{
-		PostFunc: func() error {
+		PostFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
 	}
