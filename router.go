@@ -21,7 +21,7 @@ type RouterGroup struct {
 	// PostFunc is a function that is executed after Apply is called
 	PostFunc func(rg *gin.RouterGroup) error
 	// SubGroups are nested router groups. Each subgroup inherits BasePath and PersistentMiddlewares from its parent.
-	SubGroups []RouterGroup
+	SubGroups []BaseRoute
 }
 
 // RestRouterGroup is a specialized version of RouterGroup for creating RESTful API endpoints.
@@ -39,6 +39,11 @@ type RestRouterGroup struct {
 	DeleteRoute Route
 	// RouterGroup is the base group of routes for the RESTful API.
 	RouterGroup
+}
+
+// BaseRoute is an interface that all route types must implement to be used with RouterGroup and Engine.
+type BaseRoute interface {
+	Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error)
 }
 
 // Route represents a single route

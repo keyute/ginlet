@@ -7,7 +7,7 @@ type Engine struct {
 	// Middlewares are the global middlewares that will be applied to all routes.
 	Middlewares []gin.HandlerFunc
 	// RouterGroups contains all the RouterGroups to be used with the gin engine.
-	RouterGroups []RouterGroup
+	RouterGroups []BaseRoute
 	// PreFunc is a function that is executed before New is called
 	PreFunc func(r *gin.Engine) error
 	// PostFunc is a function that is executed after New is called

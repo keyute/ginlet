@@ -47,7 +47,7 @@ func TestRouterGroup_Nested(t *testing.T) {
 	router := gin.Default()
 	group := RouterGroup{
 		BasePath: "/test",
-		SubGroups: []RouterGroup{{
+		SubGroups: []BaseRoute{&RouterGroup{
 			BasePath: "/nested",
 			Routes: map[string][]Route{
 				http.MethodGet: {{Handler: func(c *gin.Context) {
@@ -64,8 +64,8 @@ func TestRouterGroup_Nested(t *testing.T) {
 func TestRouterGroup_NestedWithError(t *testing.T) {
 	router := gin.Default()
 	group := RouterGroup{
-		SubGroups: []RouterGroup{
-			{
+		SubGroups: []BaseRoute{
+			&RouterGroup{
 				PreFunc: func(rg *gin.RouterGroup) error {
 					return fmt.Errorf("error")
 				},

@@ -28,23 +28,23 @@ func TestEngine_New(t *testing.T) {
 				}
 			},
 		},
-		RouterGroups: []RouterGroup{
-			{
+		RouterGroups: []BaseRoute{
+			&RouterGroup{
 				Routes: map[string][]Route{
 					http.MethodGet: {{Handler: func(c *gin.Context) {
 						c.String(http.StatusOK, "GET")
 					}},
 					}},
 			},
-			{
+			&RouterGroup{
 				BasePath: "/test",
 				Routes: map[string][]Route{
 					http.MethodPost: {{Handler: func(c *gin.Context) {
 						c.String(http.StatusOK, "POST")
 					}}},
 				},
-				SubGroups: []RouterGroup{
-					{
+				SubGroups: []BaseRoute{
+					&RouterGroup{
 						Routes: map[string][]Route{
 							http.MethodPatch: {{
 								Handler: func(c *gin.Context) {
