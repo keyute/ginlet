@@ -14,7 +14,7 @@ func TestRouterGroup_Apply(t *testing.T) {
 		c.Status(http.StatusOK)
 	}
 	path := "/test"
-	group := RouterGroup{
+	group := Router{
 		BasePath: path,
 		Routes: map[string][]Route{
 			http.MethodGet:    {{Handler: handler}},
@@ -32,7 +32,7 @@ func TestRouterGroup_Apply(t *testing.T) {
 }
 
 func TestRouterGroup_ApplyError(t *testing.T) {
-	group := RouterGroup{
+	group := Router{
 		Routes: map[string][]Route{
 			http.MethodGet: {{}},
 		},
@@ -42,9 +42,9 @@ func TestRouterGroup_ApplyError(t *testing.T) {
 }
 
 func TestRouterGroup_Nested(t *testing.T) {
-	group := RouterGroup{
+	group := Router{
 		BasePath: "/test",
-		SubGroups: []BaseRoute{&RouterGroup{
+		SubRouters: []Routable{&Router{
 			BasePath: "/nested",
 			Routes: map[string][]Route{
 				http.MethodGet: {{Handler: func(c *gin.Context) {
@@ -59,9 +59,9 @@ func TestRouterGroup_Nested(t *testing.T) {
 }
 
 func TestRouterGroup_NestedWithError(t *testing.T) {
-	group := RouterGroup{
-		SubGroups: []BaseRoute{
-			&RouterGroup{
+	group := Router{
+		SubRouters: []Routable{
+			&Router{
 				PreFunc: func(rg *gin.RouterGroup) error {
 					return fmt.Errorf("error")
 				},
@@ -73,7 +73,7 @@ func TestRouterGroup_NestedWithError(t *testing.T) {
 }
 
 func TestRouterGroup_PreFunc(t *testing.T) {
-	group := RouterGroup{
+	group := Router{
 		PreFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
@@ -83,7 +83,7 @@ func TestRouterGroup_PreFunc(t *testing.T) {
 }
 
 func TestRouterGroup_PostFunc(t *testing.T) {
-	group := RouterGroup{
+	group := Router{
 		PostFunc: func(rg *gin.RouterGroup) error {
 			return fmt.Errorf("error")
 		},
@@ -93,7 +93,7 @@ func TestRouterGroup_PostFunc(t *testing.T) {
 }
 
 func TestRouterGroup_Middleware(t *testing.T) {
-	group := RouterGroup{
+	group := Router{
 		Routes: map[string][]Route{
 			http.MethodGet: {{
 				Handler: func(c *gin.Context) {
@@ -118,7 +118,7 @@ func TestRouterGroup_Middleware(t *testing.T) {
 }
 
 func TestRestRouterGroup(t *testing.T) {
-	group := RestRouterGroup{
+	group := RestRouter{
 		GetRoute: Route{
 			Handler: func(c *gin.Context) {
 				c.Status(http.StatusOK)

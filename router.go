@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// RouterGroup represents a group of routes that share a common base path and middleware functions.
-type RouterGroup struct {
+// Router represents a group of routes that share a common base path and middleware functions.
+type Router struct {
 	// BasePath is the common prefix for all routes in this group
 	BasePath string
 	// Middlewares are executed for each route in this group before the route's own middlewares.
@@ -20,13 +20,12 @@ type RouterGroup struct {
 	PreFunc func(rg *gin.RouterGroup) error
 	// PostFunc is a function that is executed after Apply is called
 	PostFunc func(rg *gin.RouterGroup) error
-	// SubGroups are nested router groups. Each subgroup inherits BasePath and PersistentMiddlewares from its parent.
-	SubGroups []BaseRoute
+	// SubRouters are nested router groups. Each subgroup inherits BasePath and PersistentMiddlewares from its parent.
+	SubRouters []Routable
 }
 
-// RestRouterGroup is a specialized version of RouterGroup for creating RESTful API endpoints.
-// If RouterGroup.Routes is not empty, it will be ignored.
-type RestRouterGroup struct {
+// RestRouter is a specialized version of Router for creating RESTful API endpoints.
+type RestRouter struct {
 	//GetRoute is the route for GET requests
 	GetRoute Route
 	//PostRoute is the route for POST requests
@@ -37,12 +36,12 @@ type RestRouterGroup struct {
 	PutRoute Route
 	//DeleteRoute is the route for DELETE requests
 	DeleteRoute Route
-	// RouterGroup is the base group of routes for the RESTful API.
-	RouterGroup
+	// Router is the base group of routes for the RESTful API. If Router.Routes is not empty, it will be ignored.
+	Router
 }
 
-// BaseRoute is an interface that all route types must implement to be used with RouterGroup and Engine.
-type BaseRoute interface {
+// Routable is an interface that all route types must implement to be used with Router and Engine.
+type Routable interface {
 	Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error)
 }
 
@@ -52,7 +51,7 @@ type Route struct {
 	Path string
 	// Handler is the function to execute for this route.
 	Handler func(c *gin.Context)
-	// Middlewares are functions executed for this route after RouterGroup.PersistentMiddlewares and RouterGroup.Middlewares.
+	// Middlewares are functions executed for this route after Router.PersistentMiddlewares and Router.Middlewares.
 	Middlewares []gin.HandlerFunc
 }
 
@@ -67,8 +66,8 @@ func (r *Route) apply(group *gin.RouterGroup, httpMethod string, middlewares []g
 	return nil
 }
 
-// Apply adds routes to a provided gin router group based on the RouterGroup's configuration.
-func (rg *RouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
+// Apply adds routes to a provided gin router group based on the Router's configuration.
+func (rg *Router) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
 	group := parent.Group(rg.BasePath)
 	if rg.PreFunc != nil {
 		if err := rg.PreFunc(group); err != nil {
@@ -85,7 +84,7 @@ func (rg *RouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) 
 		}
 	}
 
-	for _, rg := range rg.SubGroups {
+	for _, rg := range rg.SubRouters {
 		if _, err := rg.Apply(group); err != nil {
 			return nil, err
 		}
@@ -99,8 +98,8 @@ func (rg *RouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) 
 	return group, nil
 }
 
-// Apply adds routes to a provided gin router group based on the RestRouterGroup's configuration.
-func (rrg *RestRouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
+// Apply adds routes to a provided gin router group based on the RestRouter's configuration.
+func (rrg *RestRouter) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
 	rrg.Routes = make(map[string][]Route)
 	routes := map[string]*Route{
 		http.MethodGet:    &rrg.GetRoute,
@@ -116,12 +115,12 @@ func (rrg *RestRouterGroup) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, er
 		}
 	}
 
-	return rrg.RouterGroup.Apply(parent)
+	return rrg.Router.Apply(parent)
 }
 
-// NewEngine creates a new gin.Engine with the provided BaseRoute.
+// NewEngine creates a new gin.Engine with the provided Routable.
 // Keep in mind that the engine is created with gin.New not gin.Default, so you will need to add your own middleware.
-func NewEngine(route BaseRoute) (*gin.Engine, error) {
+func NewEngine(route Routable) (*gin.Engine, error) {
 	engine := gin.New()
 	if _, err := route.Apply(engine.Group("")); err != nil {
 		return nil, err
