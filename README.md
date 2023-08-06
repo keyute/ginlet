@@ -19,8 +19,8 @@ import (
 )
 
 func main() {
-	route := ginlet.RestRouterGroup{
-		GetRoute: ginlet.Route{
+	route := ginlet.RestRouter{
+		GetRoute: ginlet.R{
 			Handler: func(c *gin.Context) {
 				c.String(200, "Hello, world!")
 			},
