@@ -50,7 +50,7 @@ type Route struct {
 	// Path is the path for this route
 	Path string
 	// Handler is the function to execute for this route.
-	Handler func(c *gin.Context)
+	Handler gin.HandlerFunc
 	// Middlewares are functions executed for this route after Router.PersistentMiddlewares and Router.Middlewares.
 	Middlewares []gin.HandlerFunc
 }
