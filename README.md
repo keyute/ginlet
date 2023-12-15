@@ -32,6 +32,10 @@ func main() {
 
 ```
 
+## Compatibility
+
+Ginlet mirrors Gin, where any of the three latest major releases of Go are supported.
+
 ## Contributing
 
 Ginlet is a highly opinionated wrapper that is primarily written for my projects.
