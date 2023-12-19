@@ -9,6 +9,5 @@ updates:
     schedule:
       interval: daily
     groups:
-      production:
-        dependency-type: production
+      regular:
         update-types: ["minor", "patch"]
