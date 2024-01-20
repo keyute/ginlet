@@ -6,6 +6,20 @@ import (
 	"net/http"
 )
 
+type HttpMethod string
+
+const (
+	MethodGet     HttpMethod = http.MethodGet
+	MethodPost    HttpMethod = http.MethodPost
+	MethodPut     HttpMethod = http.MethodPut
+	MethodPatch   HttpMethod = http.MethodPatch
+	MethodDelete  HttpMethod = http.MethodDelete
+	MethodOptions HttpMethod = http.MethodOptions
+	MethodHead    HttpMethod = http.MethodHead
+	MethodConnect HttpMethod = http.MethodConnect
+	MethodTrace   HttpMethod = http.MethodTrace
+)
+
 // Router represents a group of routes that share a common base path and middleware functions.
 type Router struct {
 	// BasePath is the common prefix for all routes in this group
@@ -15,7 +29,7 @@ type Router struct {
 	// PersistentMiddlewares are executed for each route before the route's own middlewares and Middlewares.
 	PersistentMiddlewares []gin.HandlerFunc
 	// Routes is a map where the key is the HTTP method and the value is a slice of Route.
-	Routes map[string][]Route
+	Routes map[HttpMethod][]Route
 	// PreFunc is a function that is executed before Apply is called
 	PreFunc func(rg *gin.RouterGroup) error
 	// PostFunc is a function that is executed after Apply is called
@@ -55,14 +69,14 @@ type Route struct {
 	Middlewares []gin.HandlerFunc
 }
 
-func (r *Route) apply(group *gin.RouterGroup, httpMethod string, middlewares []gin.HandlerFunc) error {
+func (r *Route) apply(group *gin.RouterGroup, httpMethod HttpMethod, middlewares []gin.HandlerFunc) error {
 	if r.Handler == nil {
 		return fmt.Errorf("handler is nil for route %s", r.Path)
 	}
 	if r.Middlewares != nil {
 		middlewares = append(middlewares, r.Middlewares...)
 	}
-	group.Handle(httpMethod, r.Path, append(middlewares, r.Handler)...)
+	group.Handle(string(httpMethod), r.Path, append(middlewares, r.Handler)...)
 	return nil
 }
 
@@ -100,13 +114,13 @@ func (rg *Router) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
 
 // Apply adds routes to a provided gin router group based on the RestRouter's configuration.
 func (rrg *RestRouter) Apply(parent *gin.RouterGroup) (*gin.RouterGroup, error) {
-	rrg.Routes = make(map[string][]Route)
-	routes := map[string]*Route{
-		http.MethodGet:    &rrg.GetRoute,
-		http.MethodPost:   &rrg.PostRoute,
-		http.MethodPatch:  &rrg.PatchRoute,
-		http.MethodPut:    &rrg.PutRoute,
-		http.MethodDelete: &rrg.DeleteRoute,
+	rrg.Routes = make(map[HttpMethod][]Route)
+	routes := map[HttpMethod]*Route{
+		MethodGet:    &rrg.GetRoute,
+		MethodPost:   &rrg.PostRoute,
+		MethodPatch:  &rrg.PatchRoute,
+		MethodPut:    &rrg.PutRoute,
+		MethodDelete: &rrg.DeleteRoute,
 	}
 
 	for method, route := range routes {
