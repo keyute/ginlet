@@ -16,11 +16,11 @@ func TestRouterGroup_Apply(t *testing.T) {
 	path := "/test"
 	group := Router{
 		BasePath: path,
-		Routes: map[string][]Route{
-			http.MethodGet:    {{Handler: handler}},
-			http.MethodPost:   {{Handler: handler}},
-			http.MethodPatch:  {{Handler: handler}},
-			http.MethodDelete: {{Handler: handler}},
+		Routes: map[HttpMethod][]Route{
+			MethodGet:    {{Handler: handler}},
+			MethodPost:   {{Handler: handler}},
+			MethodPatch:  {{Handler: handler}},
+			MethodDelete: {{Handler: handler}},
 		},
 	}
 	router, err := NewEngine(&group)
@@ -33,8 +33,8 @@ func TestRouterGroup_Apply(t *testing.T) {
 
 func TestRouterGroup_ApplyError(t *testing.T) {
 	group := Router{
-		Routes: map[string][]Route{
-			http.MethodGet: {{}},
+		Routes: map[HttpMethod][]Route{
+			MethodGet: {{}},
 		},
 	}
 	_, err := NewEngine(&group)
@@ -46,8 +46,8 @@ func TestRouterGroup_Nested(t *testing.T) {
 		BasePath: "/test",
 		SubRouters: []Routable{&Router{
 			BasePath: "/nested",
-			Routes: map[string][]Route{
-				http.MethodGet: {{Handler: func(c *gin.Context) {
+			Routes: map[HttpMethod][]Route{
+				MethodGet: {{Handler: func(c *gin.Context) {
 					c.Status(http.StatusOK)
 				}}},
 			},
@@ -94,8 +94,8 @@ func TestRouterGroup_PostFunc(t *testing.T) {
 
 func TestRouterGroup_Middleware(t *testing.T) {
 	group := Router{
-		Routes: map[string][]Route{
-			http.MethodGet: {{
+		Routes: map[HttpMethod][]Route{
+			MethodGet: {{
 				Handler: func(c *gin.Context) {
 					c.String(http.StatusOK, c.GetString("test"))
 				},
