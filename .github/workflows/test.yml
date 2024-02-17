@@ -19,6 +19,6 @@ jobs:
         with:
           go-version: ${{ matrix.version }}
           check-latest: true
-      - uses: robherley/go-test-action@v0.1.0
+      - uses: robherley/go-test-action@v0.2.0
         with:
           omitUntestedPackages: true
