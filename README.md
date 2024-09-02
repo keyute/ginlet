@@ -34,7 +34,7 @@ func main() {
 
 ## Compatibility
 
-Ginlet mirrors Gin, where any of the three latest major releases of Go are supported.
+Ginlet has been tested against Go 1.21 and 1.22 and will most likely work with future versions.
 
 ## Contributing
 
